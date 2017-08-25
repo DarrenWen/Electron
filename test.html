@@ -83,7 +83,37 @@ for(var i = 0; i <2;i++){
     });  
 }  
     }
-    MqttClientTest();
+    
+    const {ipcRenderer} = require('electron');
+    function TestIpcMain()
+    {
+     //监听mian process里发出的message
+ipcRenderer.on('asynchronous-reply', (event, arg) => {
+     alert("web2" + arg);// prints "pong"  在electron中web page里的console方法不起作用，因此使用alert作为测试方法
+
+  });
+  
+
+ //在web page里向main process发出message
+ ipcRenderer.send('asynchronous-message', 'ping') // prints "pong"   
+   //var value = ipcRenderer.sendSync('synchronous-message', 'ping'); // prints "pong"   
+   //alert("web1" + value);
+
+  
+}
+
+ function A(arg){
+    document.getElementById("holder").innerHTML+='<br />DATA ' +arg;
+   };
+
+var mqclient = require('./Code/mqtttest');
+function testA(){
+    mqclient.CreateClient((topic,data)=>{
+   A(topic+' > '+data);
+  });
+}
+
+testA();
   
 </script>
 </html>

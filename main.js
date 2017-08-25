@@ -1,9 +1,25 @@
 //electron 会通过node去执行main.js这个模块，electron内置了elecron这个模块，拥有electron相应的API；
-const electron = require('electron')
+const electron = require('electron');
 
 var path=require("path");
 var cp = require('child_process');
 
+
+
+const {ipcMain} = require('electron');
+
+//监听web page里发出的message
+ipcMain.on('asynchronous-message', (event, arg) => {
+  console.log("mian1" + arg)  // prints "ping"
+  event.sender.send('asynchronous-reply', 'pong')//在main process里向web page发出message
+});
+
+//一部发送消息
+ipcMain.on('synchronous-message', (event, arg) => {
+  console.log("mian2" + arg)  // prints "ping"
+  event.returnValue = 'pong';
+ 
+});
 
 
 const app = electron.app  // 构建app模块
@@ -21,13 +37,20 @@ function createWindow () {
   //mainWindow.loadURL(`https://github.com`) //可以直接使用外部的一个网址，构建一个桌面应用；
   //mainWindow.webContents.openDevTools()
 
+  mainWindow.webContents.on('did-finish-load', function(){
+    mainWindow.webContents.send('mqtt-print', 'whooooooooooo');
+    });
+
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null
-  })
+  });
+
+
+ 
 }
 
 app.on('ready', createWindow) //当应用启动完成，注册ready方法，初始化一个新的窗口，此方法后可以调用API了
